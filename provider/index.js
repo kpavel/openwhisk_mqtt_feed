@@ -15,6 +15,8 @@ if (process.env.VCAP_SERVICES) {
 } else if (process.env.CLOUDANT_USERNAME && process.env.CLOUDANT_PASSWORD){
   creds.username = process.env.CLOUDANT_USERNAME
   creds.password = process.env.CLOUDANT_PASSWORD
+  creds.dbhost = process.env.CLOUDANT_HOST
+  creds.apihost = process.env.API_HOST
 }
 
 if (!creds.username || !creds.password) {
@@ -22,8 +24,9 @@ if (!creds.username || !creds.password) {
   process.exit(1)
 }
 
-const cloudant = Cloudant({account: creds.username, password: creds.password})
-const feed_controller = new FeedController(cloudant.db.use('topic_listeners'), 'https://openwhisk.ng.bluemix.net/api/v1/')
+var url = "http://" + creds.username + ":" + creds.password + "@" + creds.dbhost + ":5984";
+const cloudant = Cloudant(url);
+const feed_controller = new FeedController(cloudant.db.use('topic_listeners'), creds.apihost)
 
 feed_controller.initialise().then(() => {
   const handle_error = (err, message, res) => {

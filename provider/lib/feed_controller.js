@@ -42,7 +42,7 @@ class FeedController {
   fire_trigger (trigger, params) {
     console.log(`Firing trigger: ${trigger.trigger}`, params)
     const [namespace, name] = trigger.trigger.split('/').slice(1)
-    var ow = openwhisk({api: this.ow_endpoint, api_key: `${trigger.username}:${trigger.password}`, namespace: namespace});
+    var ow = openwhisk({apihost: this.ow_endpoint, api_key: `${trigger.username}:${trigger.password}`, namespace: namespace, ignore_certs: true});
     ow.triggers.invoke({triggerName: name, params: params})
       .catch(err => console.error(`Failed to fire trigger ${trigger.trigger}`, err.reason))
   }
