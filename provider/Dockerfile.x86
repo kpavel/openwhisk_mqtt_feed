@@ -1,4 +1,4 @@
-FROM resin/raspberry-pi-node
+FROM mhart/alpine-node:6 
 
 RUN mkdir -p /usr/src/app
 WORKDIR /usr/src/app

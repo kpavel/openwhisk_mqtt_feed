@@ -1,5 +1,5 @@
 const express = require('express')
-const Cloudant = require('cloudant');
+const Cloudant = require('@cloudant/cloudant');
 const FeedController = require('./lib/feed_controller.js')
 
 // setup express for handling HTTP requests
@@ -12,17 +12,12 @@ let creds = {}
 if (process.env.VCAP_SERVICES) {
   const appEnv = require('cfenv').getAppEnv()
   creds = appEnv.getServiceCreds(/cloudant/i)
-} else if (process.env.CLOUDANT_USERNAME && process.env.CLOUDANT_PASSWORD){
-  creds.username = process.env.CLOUDANT_USERNAME
-  creds.password = process.env.CLOUDANT_PASSWORD
-}
-
-if (!creds.username || !creds.password) {
+} else if (!process.env.CLOUDANT_URL){
   console.error('Missing cloudant credentials...')
   process.exit(1)
 }
 
-const cloudant = Cloudant({account: creds.username, password: creds.password})
+const cloudant = Cloudant(process.env.CLOUDANT_URL)
 const feed_controller = new FeedController(cloudant.db.use('topic_listeners'), 'https://openwhisk.ng.bluemix.net/api/v1/')
 
 feed_controller.initialise().then(() => {
