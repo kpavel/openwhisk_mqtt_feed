@@ -4,6 +4,7 @@ let _resolve, _reject
 function main (msg) {
   console.dir(msg);
   let promise;
+  _msg = msg;
   if (msg.lifecycleEvent === 'CREATE') {
     promise = new Promise( (resolve, reject) => {
       _resolve = resolve
@@ -34,8 +35,9 @@ function create (msg) {
   const user_pass = msg.authKey.split(':')
   const body = {
     trigger: msg.triggerName,
-    url: msg.url,
+    url: msg.broker_url || msg.url,  // if package has default broker url, use it. otherwise use one specified in trigger properties
     topic: msg.topic,
+    clientid: msg.clientid,
     username: user_pass[0],
     password: user_pass[1]
   }
@@ -62,10 +64,23 @@ function get (msg) {
 }
 
 function handle_response (err, res, body) {
-  console.log('handle_response', err, res, body);
   if (!err && res.statusCode === 200) {
     console.log('mqtt feed: http request success.')
-    _resolve({done: true})
+
+    if (_msg.lifecycleEvent === 'READ'){
+      body = JSON.parse(body)
+      result = {
+        config: {
+          name: body.trigger,
+          url: body.url,
+          topic: body.topic
+        }
+      };
+    }else{
+      result = {done: true}
+    }
+
+    _resolve(result)
   } 
 
   if(res) {

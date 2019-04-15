@@ -42,15 +42,15 @@ class FeedController {
   fire_trigger (trigger, params) {
     console.log(`Firing trigger: ${trigger.trigger}`, params)
     const [namespace, name] = trigger.trigger.split('/').slice(1)
-    var ow = openwhisk({api: this.ow_endpoint, api_key: `${trigger.username}:${trigger.password}`, namespace: namespace});
+    var ow = openwhisk({api: this.ow_endpoint, api_key: `${trigger.username}:${trigger.password}`, namespace: namespace, ignore_certs: true});
     ow.triggers.invoke({triggerName: name, params: params})
       .catch(err => console.error(`Failed to fire trigger ${trigger.trigger}`, err.reason))
   }
 
   add_trigger (trigger) {
     const mgr = this.mqtt_subscription_mgr
-    return this.trigger_store.add(trigger).then(() => { 
-      mgr.subscribe(trigger.url, trigger.topic) 
+    return this.trigger_store.add(trigger).then(() => {
+      mgr.subscribe(trigger.url, trigger.topic, trigger.clientid)
       if (mgr.is_connected(trigger.url)) {
         const params = {type: 'status', body: 'connected'}
         this.fire_trigger(trigger, params)
@@ -60,7 +60,7 @@ class FeedController {
 
   remove_trigger (namespace, trigger) {
     const mgr = this.mqtt_subscription_mgr
-    return this.trigger_store.remove(`${namespace}/${trigger}`).then(() => mgr.unsubscribe(trigger.url, trigger.topic))
+    return this.trigger_store.remove(`${namespace}/${trigger}`).then(() => mgr.unsubscribe(trigger.url, trigger.topic, trigger.clientid))
   }
   
   get_trigger (namespace, trigger) {

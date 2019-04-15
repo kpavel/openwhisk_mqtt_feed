@@ -9,16 +9,20 @@ class MQTTSubscriptionMgr extends EventEmitter {
     this.mqtt = mqtt
   }
 
-  conn_client (url) {
+  conn_client (url, clientid) {
     if (!this.connections.has(url)) {
-      this.setup_client(url)
+      this.setup_client(url, clientid)
     }
 
     return this.connections.get(url)
   }
 
-  setup_client (url) {
-    const client = this.mqtt.connect(url)
+  setup_client (url, clientid) {
+    var props = {}
+    if (clientid){
+	props.clientId = clientid;
+    }
+    const client = this.mqtt.connect(url, props)
 
     this.connections.set(url, {
       client: client,
@@ -57,8 +61,8 @@ class MQTTSubscriptionMgr extends EventEmitter {
     return this.connections.get(url).client.connected
   }
 
-  subscribe (url, topic) {
-    const topic_client = this.conn_client(url)
+  subscribe (url, topic, clientid) {
+    const topic_client = this.conn_client(url, clientid)
     const listener_count = (topic_client.topics.get(topic) || 0)
 
     if (!listener_count) {
@@ -68,8 +72,8 @@ class MQTTSubscriptionMgr extends EventEmitter {
     topic_client.topics.set(topic, listener_count + 1)
   }
 
-  unsubscribe (url, topic) {
-    const topic_client = this.conn_client(url)
+  unsubscribe (url, topic, clientid) {
+    const topic_client = this.conn_client(url, clientid)
     const listener_count = (topic_client.topics.get(topic) || 0)
 
     if (listener_count === 1) {

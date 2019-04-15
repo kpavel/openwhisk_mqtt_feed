@@ -13,12 +13,15 @@ if (process.env.VCAP_SERVICES) {
   const appEnv = require('cfenv').getAppEnv()
   creds = appEnv.getServiceCreds(/cloudant/i)
 } else if (!process.env.CLOUDANT_URL){
-  console.error('Missing cloudant credentials...')
+  console.error('Missing CLOUDANT_URL, e.g. http://whisk_admin:some_passw0rd@172.17.0.1:5984')
   process.exit(1)
+} else if (!process.env.API_HOST){
+  console.error('Missing API_HOST, e.g. openwhisk.ng.bluemix.net or 172.17.0.1')
 }
 
 const cloudant = Cloudant(process.env.CLOUDANT_URL)
-const feed_controller = new FeedController(cloudant.db.use('topic_listeners'), 'https://openwhisk.ng.bluemix.net/api/v1/')
+const feed_controller = new FeedController(cloudant.db.use('topic_listeners'), 'https://' + process.env.API_HOST + '/api/v1/')
+
 
 feed_controller.initialise().then(() => {
   const handle_error = (err, message, res) => {
