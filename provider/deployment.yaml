@@ -1,0 +1,31 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: ow-mqtt-provider-service
+  labels:
+    k8s-app: ow-mqtt-provider
+spec:
+  selector:
+    k8s-app: ow-mqtt-provider
+  type: NodePort
+  ports:
+   - port: 3000
+     nodePort: 30042
+---
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: ow-mqtt-provider-deployment
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        k8s-app: ow-mqtt-provider
+    spec:
+      containers:
+      - name: ow-mqtt-provider
+        image: $MQTT_PROVIDER_DOCKER_IMAGE
+        env:
+        - name: CLOUDANT_URL
+          value: $CLOUDANT_URL
