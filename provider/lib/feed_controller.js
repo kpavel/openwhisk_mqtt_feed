@@ -62,6 +62,12 @@ class FeedController {
     const mgr = this.mqtt_subscription_mgr
     return this.trigger_store.remove(`${namespace}/${trigger}`).then(() => mgr.unsubscribe(trigger.url, trigger.topic))
   }
+  
+  get_trigger (namespace, trigger) {
+    const mgr = this.mqtt_subscription_mgr
+    return this.trigger_store.get(`${namespace}/${trigger}`)
+  }
+   
 }
 
 module.exports = FeedController

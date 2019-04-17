@@ -16,6 +16,12 @@ function main (msg) {
       _reject = reject
       remove(msg)
     })
+  } else if (msg.lifecycleEvent === 'READ') {
+    promise = new Promise( (resolve, reject) => {
+      _resolve = resolve
+      _reject = reject
+      get(msg)
+    })
   }
   return (typeof promise !== 'undefined' ? promise : {done: true})
 }
@@ -48,7 +54,15 @@ function remove (msg) {
   }, handle_response)
 }
 
+function get (msg) {
+  request({
+    method: "GET",
+    uri: msg.provider_endpoint + msg.triggerName
+  }, handle_response)
+}
+
 function handle_response (err, res, body) {
+  console.log('handle_response', err, res, body);
   if (!err && res.statusCode === 200) {
     console.log('mqtt feed: http request success.')
     _resolve({done: true})

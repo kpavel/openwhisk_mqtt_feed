@@ -11,9 +11,16 @@ class TriggerStore {
   }
 
   remove (id) {
+    id="/" + id;
     const _get = Promise.promisify(this.db.get, {context: this.db})
     const _destroy = Promise.promisify(this.db.destroy, {context: this.db})
     return _get(id).then(doc => _destroy(doc._id, doc._rev)) 
+  }
+
+  get (id) {
+    id="/" + id;
+    const _get = Promise.promisify(this.db.get, {context: this.db})
+    return _get(id)
   }
 
   triggers (url, topic) {

@@ -37,6 +37,11 @@ feed_controller.initialise().then(() => {
       .catch(err => handle_error(err, 'failed to remove MQTT topic trigger', res))
   })
 
+  app.get('/mqtt/:namespace/:trigger', (req, res) => {
+    feed_controller.get_trigger(req.params.namespace, req.params.trigger).then((trigger) => res.send(trigger))
+      .catch(err => handle_error(err, 'failed to remove MQTT topic trigger', res))
+  })
+
   app.listen(3000, function () {
     console.log('MQTT Trigger Provider listening on port 3000!')
   })
